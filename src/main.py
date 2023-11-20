@@ -4,8 +4,8 @@ import cv2
 
 def main():
     # Set paths and parameters
-    model_path = '../data/model/centernet_hg104_512x512_coco17_tpu-8/saved_model'
-    image_path = '../data/sample_images/sample_01.jpeg'
+    model_path = './data/model/centernet_hg104_512x512_coco17_tpu-8/saved_model'
+    image_path = './data/sample_images/sample_01.jpeg'
 
     # Initialize Object Detector
     detector = ObjectDetector(model_path)
