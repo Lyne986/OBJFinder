@@ -1,44 +1,36 @@
 import cv2
+import warnings
+import numpy as np
 
+warnings.filterwarnings("ignore", category=FutureWarning)
 class ObjectHighlighter:
     def __init__(self):
         pass
 
-    def highlight_objects(self, image, objects):
-        if image is None or len(objects) == 0:
-            return image
+    def highlight_objects(self, image, detected_objects):
+        result_image = image.copy()
 
-        highlighted_image = image.copy()
+        # Convert image to grayscale
+        gray_image = cv2.cvtColor(result_image, cv2.COLOR_BGR2GRAY)
 
-        for obj in objects:
-            # Check if the 'bbox' key exists
-            if 'bbox' in obj:
-                bbox = obj['bbox']
+        # Define a list of colors for each object
+        colors = [(0, 255, 0), (0, 0, 255), (255, 0, 0)]  # Green, Red, Blue (add more colors as needed)
 
-                # Check if bbox is a list or tuple with four elements
-                if isinstance(bbox, (list, tuple)) and len(bbox) == 4:
-                    x, y, w, h = bbox
-                else:
-                    print(f"Warning: Skipping object with invalid 'bbox' structure: {bbox}")
-                    continue
+        for i, box in enumerate(detected_objects):
+            # Convert coordinates to pixel values
+            y_min, x_min, y_max, x_max = (box * np.array([result_image.shape[0], result_image.shape[1], result_image.shape[0], result_image.shape[1]])).astype(int)
 
-                # Draw a rectangle around the detected object
-                cv2.rectangle(highlighted_image, (int(x * image.shape[1]), int(y * image.shape[0])),
-                              (int((x + w) * image.shape[1]), int((y + h) * image.shape[0])), (0, 255, 0), 2)
+            # Draw contours on the result image
+            color = colors[i % len(colors)]  # Cycle through colors
 
-                # Add a text label
-                label = obj.get('class_name', 'Object')
-                cv2.putText(highlighted_image, label, (int(x * image.shape[1]), int(y * image.shape[0]) - 5),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+            # Draw contours around the object
+            roi = gray_image[y_min:y_max, x_min:x_max]
+            _, thresh = cv2.threshold(roi, 1, 255, cv2.THRESH_BINARY)
+            contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-                # Apply a custom modification to the aspect of the detected object
-                # For example, you can draw a border around the object
-                border_thickness = 5
-                cv2.rectangle(highlighted_image,
-                              (int((x - border_thickness) * image.shape[1]), int((y - border_thickness) * image.shape[0])),
-                              (int((x + w + border_thickness) * image.shape[1]), int((y + h + border_thickness) * image.shape[0])),
-                              (0, 255, 0), border_thickness)
-            else:
-                print("Warning: Skipping object with missing 'bbox' key:", obj)
+            # Draw polygons around the contours
+            for contour in contours:
+                contour = contour + np.array([x_min, y_min])  # Offset the contour based on the object position
+                cv2.polylines(result_image, [contour], isClosed=True, color=color, thickness=2)
 
-        return highlighted_image
+        return result_image

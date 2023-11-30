@@ -1,12 +1,14 @@
 import os
 import tensorflow as tf
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 model = tf.keras.applications.EfficientNetB0()
 model.compile()
-tf.keras.models.save_model(
-    model, 'broken',
-    options=tf.saved_model.SaveOptions(experimental_custom_gradients=True))
+tf.keras.models.save_model(model, 'broken')
 
 model = tf.keras.models.load_model("broken")
+
 
 from tensorflow.keras import models
 import cv2
@@ -14,7 +16,6 @@ tf.get_logger().setLevel('ERROR')
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow logging (1)
 tf.get_logger().setLevel('ERROR')  # Suppress TensorFlow logging (2)
-
 class ObjectDetector:
     def __init__(self, model_path):
         self.model = models.load_model(model_path)
