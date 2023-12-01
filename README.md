@@ -1,5 +1,5 @@
-```markdown
 # Object Finder
+```markdown
 
 ## Overview
 
@@ -43,10 +43,10 @@ Object Finder is a Python project that uses the DeepLabV3+ model to identify peo
 
 ## Contributions
 
-- Developer: [@Diogo Faria Martins](https://github.com/Lyne986)
-- Developer: [@김서해](https://github.com/westsea6535)
-- Developer: [@Bastien Boymond](https://github.com/BastienBoymond)
-- Developer: [@Hugo Nini](https://github.com/Carpetic)
+- [@Diogo Faria Martins](https://github.com/Lyne986)
+- [@김서해](https://github.com/westsea6535)
+- [@Bastien Boymond](https://github.com/BastienBoymond)
+- [@Hugo Nini](https://github.com/Carpetic)
 
 ## Acknowledgments
 
