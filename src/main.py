@@ -78,8 +78,7 @@ class PeopleHighlightApp(QWidget):
 
     def create_people_mask(self, segmentation, people_class_index=15):
         # Create a mask for people's bodies
-        mask = segmentation == people_class_index
-        return mask
+        return segmentation == people_class_index
 
     def update_mask(self):
         # Update the mask based on the current alpha slider value
@@ -105,23 +104,21 @@ class PeopleHighlightApp(QWidget):
         # Normalize alpha channel to the range [0, 1]
         alpha_normalized = alpha / 255.0
 
-        height, width = len(image), len(image[0])
-
-        for y in range(height):
-            row = []
-            for x in range(width):
+        for y, row in enumerate(image):
+            new_row = []
+            for x, pixel in enumerate(row):
                 if mask[y][x]:
                     # Convert the list to a tuple before multiplication
                     color_tuple = (0, 0, 255)
                     updated_pixel = tuple(
-                        int((1 - alpha_normalized) * image[y][x][c] +
+                        int((1 - alpha_normalized) * pixel[c] +
                             alpha_normalized * color_tuple[c])
                         for c in range(3)
                     )
-                    row.append(updated_pixel)
+                    new_row.append(updated_pixel)
                 else:
-                    row.append(image[y][x])
-            image_with_colored_people.append(row)
+                    new_row.append(pixel)
+            image_with_colored_people.append(new_row)
 
         # Apply blur to the detected people's region
         image_with_colored_people = self.apply_blur(image_with_colored_people, mask, blur_level)
@@ -139,11 +136,11 @@ class PeopleHighlightApp(QWidget):
                 for x in range(min_x, max_x + 1):
                     if mask[y][x]:
                         # Blur only the people's region
-                        image[y][x] = self.apply_pixel_blur(image, x, y, blur_level)
+                        image[y][x] = self.apply_pixel_blur(image, mask, x, y, blur_level)
 
         return image
 
-    def apply_pixel_blur(self, image, x, y, blur_level):
+    def apply_pixel_blur(self, image, mask, x, y, blur_level):
         # Apply blur to a single pixel using a simple averaging filter
         height, width = len(image), len(image[0])
         channels = len(image[0][0])
@@ -153,10 +150,11 @@ class PeopleHighlightApp(QWidget):
 
         for i in range(max(0, y - blur_level), min(height, y + blur_level + 1)):
             for j in range(max(0, x - blur_level), min(width, x + blur_level + 1)):
-                total_pixels += 1
-                total_color = [total_color[c] + image[i][j][c] for c in range(channels)]
+                if mask[i][j]:
+                    total_pixels += 1
+                    total_color = list(map(sum, zip(total_color, image[i][j])))
 
-        averaged_color = [int(total_color[c] / total_pixels) for c in range(channels)]
+        averaged_color = [int(val / total_pixels) for val in total_color]
 
         return tuple(averaged_color)
 
