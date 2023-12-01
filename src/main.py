@@ -15,7 +15,8 @@ image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Read image with alpha ch
 
 # Ensure the image has an alpha channel
 if image.shape[2] == 3:
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
+    alpha_channel = np.ones((image.shape[0], image.shape[1], 1), dtype=np.uint8) * 255
+    image = np.concatenate((image, alpha_channel), axis=2)
 
 image_rgb = image[:, :, :3]  # Extract RGB channels
 
