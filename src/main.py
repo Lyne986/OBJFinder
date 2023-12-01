@@ -1,71 +1,56 @@
+import torch
+from torchvision.models.segmentation import deeplabv3_resnet101
+from torchvision.transforms import functional as F
+import matplotlib.pyplot as plt
+import numpy as np
 import cv2
-from object_detection.detector import ObjectDetector
-from image_processing.highlighter import ObjectHighlighter
-import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
 
-def main():
-    # Set paths and parameters
-    model_path = './data/model/centernet_hg104_512x512_coco17_tpu-8/saved_model'
-    image_path = './data/sample_images/sample_01.jpeg'
+# Load a pre-trained DeepLabV3+ model
+model = deeplabv3_resnet101(pretrained=True)
+model.eval()
 
-    # Initialize Object Detector
-    detector = ObjectDetector(model_path)
+# Load your image using OpenCV
+image_path = "./data/sample_images/sample_01.jpeg"
+image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)  # Read image with alpha channel
 
-    # Detect objects in the image
-    detected_objects = detector.detect_objects(image_path)
-    # detected_objects = [[0.31110087, 0.44024128, 0.7921666, 0.5337339 ], [0.4871961, 0.5335798, 0.78029835, 0.5961493 ],[0.54409474, 0.40709233, 0.70301193, 0.4872657 ]];
+# Ensure the image has an alpha channel
+if image.shape[2] == 3:
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2BGRA)
 
-    # Load the original image
-    original_image = cv2.imread(image_path)
+image_rgb = image[:, :, :3]  # Extract RGB channels
 
-    # Check if the images are loaded and objects are detected successfully
-    if original_image is None:
-        print(f"Error: Unable to load the original image from path: {image_path}")
-        return
+image_tensor = F.to_tensor(image_rgb).unsqueeze(0)
 
-    if detected_objects is None:
-        print("Error: Object detection failed.")
-        return
+with torch.no_grad():
+    output = model(image_tensor)['out']
 
-    # # Filter detected objects to only include those with a 'class_id' key and class ID 1
-    detected_people = [obj for obj in detected_objects if 'class_id' in obj and obj['class_id'] == 1]
+segmentation = output.argmax(1).squeeze().detach().cpu().numpy()
 
-    print("Detected objects", detected_objects)
+# Create a mask for people's bodies
+people_class_index = 15
+mask = segmentation == people_class_index
 
-    # Initialize Object Highlighter
-    highlighter = ObjectHighlighter()
+# Change the color and alpha of people's bodies
+color = np.array([255, 0, 0, 128], dtype=np.uint8)  # Red color with alpha
+alpha = 128.0  # Set transparency level (0 to 255) as a float
 
-    # Highlight detected people in the original image
-    result_image = highlighter.highlight_objects(original_image, detected_objects)
+# Ensure the alpha channel is a 2D array
+alpha_channel = image[:, :, 3]  # Extract the alpha channel
+alpha_channel = alpha_channel[:, :, np.newaxis].astype(np.float64)  # Convert to float64
 
-    # Check if the result image is created successfully
-    if result_image is None:
-        print("Error: Object highlighting failed.")
-        return
+# Apply alpha blending using NumPy
+image_with_colored_people = np.copy(image)
+alpha_channel_normalized = alpha_channel / 255.0  # Normalize alpha channel to the range [0, 1]
+image_with_colored_people[mask, :3] = (
+    (1 - alpha_channel_normalized[mask, None]) * image_with_colored_people[mask, :3] +
+    alpha_channel_normalized[mask, None] * color[:3]
+).astype(np.uint8)
+image_with_colored_people[mask, 3] = (
+    alpha_channel[mask] + (1 - alpha_channel_normalized[mask]) * color[3]
+).astype(np.uint8)
 
-    # Print the detected people and their bounding boxes
-    print("Detected People:", detected_people)
-
-    # Resize the images if they have different dimensions
-    if original_image.shape[0] != result_image.shape[0] or original_image.shape[1] != result_image.shape[1]:
-        result_image = cv2.resize(result_image, (original_image.shape[1], original_image.shape[0]))
-
-    # Ensure both images have the same number of channels
-    if original_image.shape[2] != result_image.shape[2]:
-        result_image = cv2.cvtColor(result_image, cv2.COLOR_BGR2RGB)
-
-    # Display the original and result images side by side
-    combined_image = cv2.hconcat([original_image, result_image])
-
-    # Display or save the combined image
-    cv2.imshow("Original and Result Images", combined_image)
-
-    # Add a key check to close the window when any key is pressed
-    cv2.waitKey(0)
-
-    # Release the OpenCV windows
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    main()
+# Display the original image and the image with highlighted people's bodies using OpenCV
+cv2.imshow('Original Image', image)
+cv2.imshow('Colored People Bodies', image_with_colored_people)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
