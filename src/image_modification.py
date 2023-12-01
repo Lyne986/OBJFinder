@@ -20,7 +20,7 @@ class ImageModification:
         # Create a mask for people's bodies
         return segmentation == people_class_index
 
-    def color_people(self, image, mask, alpha):
+    def color_people(self, image, mask, alpha, red, green, blue):
         # Change the color and alpha of people's bodies without using NumPy
         image_with_colored_people = []
 
@@ -32,7 +32,7 @@ class ImageModification:
             for x, pixel in enumerate(row):
                 if mask[y][x]:
                     # Convert the list to a tuple before multiplication
-                    color_tuple = (0, 0, 255)
+                    color_tuple = (red, green, blue)
                     updated_pixel = tuple(
                         int((1 - alpha_normalized) * pixel[c] +
                             alpha_normalized * color_tuple[c])

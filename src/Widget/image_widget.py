@@ -21,7 +21,11 @@ class ImageWidget(QWidget):
         # Initialize mask, alpha, and blur level
         self.mask = None
         self.alpha = 128
+        self.red = 0
+        self.green = 0
+        self.blue = 255
         self.blur_level = 0
+
 
         # UI elements
         self.image_label = QLabel()
@@ -29,8 +33,25 @@ class ImageWidget(QWidget):
         self.alpha_slider.setRange(0, 255)
         self.alpha_slider.setValue(self.alpha)
 
+        self.red_slider = QSlider(Qt.Horizontal)
+        self.red_slider.setRange(0, 255)
+        self.red_slider.setValue(self.red)
+
+
+        self.green_slider = QSlider(Qt.Horizontal)
+        self.green_slider.setRange(0, 255)
+        self.green_slider.setValue(self.green)
+
+        self.blue_slider = QSlider(Qt.Horizontal)
+        self.blue_slider.setRange(0, 255)
+        self.blue_slider.setValue(self.blue)
+
         # Connect slider value change to update mask and blur level dynamically
         self.alpha_slider.valueChanged.connect(self.update_mask)
+        self.red_slider.valueChanged.connect(self.update_mask)
+        self.blue_slider.valueChanged.connect(self.update_mask)
+        self.green_slider.valueChanged.connect(self.update_mask)
+
 
         self.alpha_checkbox = QCheckBox("Show Alpha Slider")
         self.alpha_checkbox.setChecked(True)
@@ -66,6 +87,15 @@ class ImageWidget(QWidget):
         slider_layout.addWidget(QLabel("Blur Level:"))
         slider_layout.addWidget(self.blur_slider)
 
+        color_layout = QHBoxLayout()
+        color_layout.addWidget(QLabel("Red"))
+        color_layout.addWidget(self.red_slider)
+        color_layout.addWidget(QLabel("Green"))
+        color_layout.addWidget(self.green_slider)
+        color_layout.addWidget(QLabel("Blue"))
+        color_layout.addWidget(self.blue_slider)
+
+
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.choose_image_button)
         button_layout.addWidget(self.delete_image_button)
@@ -73,6 +103,7 @@ class ImageWidget(QWidget):
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.image_label)
         main_layout.addLayout(slider_layout)
+        main_layout.addLayout(color_layout)
         main_layout.addLayout(button_layout)
 
         # Image data
@@ -94,12 +125,16 @@ class ImageWidget(QWidget):
             # Load the selected image
             self.image_path = selected_file
             self.image = self.image_modification.load_image(self.image_path)
+            print(self.image_path)
 
             # Initial segmentation and mask
             self.segmentation = self.segmentation_model.apply_segmentation(self.image)
 
             # Enable sliders and delete button
             self.alpha_slider.setEnabled(True)
+            self.red_slider.setEnabled(True)
+            self.blue_slider.setEnabled(True)
+            self.blue_slider.setEnabled(True)
             self.blur_slider.setEnabled(True)
             self.delete_image_button.setEnabled(True)
 
@@ -113,16 +148,27 @@ class ImageWidget(QWidget):
     def update_mask(self):
         # Get the current value of the alpha slider
         current_alpha = self.alpha_slider.value()
+        current_red = self.red_slider.value()
+        current_blue = self.blue_slider.value()
+        current_green = self.green_slider.value()
 
         # Check if the alpha slider triggered the update
-        if current_alpha != self.alpha:
+        if current_alpha != self.alpha or current_red != self.red or current_blue != self.blue or current_green != self.green:
+
             # Update the mask based on the current alpha slider value
             self.alpha = current_alpha
+            self.red = current_red
+            self.green = current_green
+            self.blue = current_blue
             self.mask = self.image_modification.create_people_mask(self.segmentation)
+            print(self.alpha)
+            print(self.red)
+            print(self.blue)
+            print(self.green)
 
             # Color people's bodies with the specified alpha
             colored_people_image = self.image_modification.color_people(
-                self.image, self.mask, self.alpha
+                self.image, self.mask, self.alpha, self.red, self.green, self.blue
             )
 
             # Save the colored image for future reference
