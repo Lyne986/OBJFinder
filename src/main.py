@@ -34,19 +34,22 @@ mask = segmentation == people_class_index
 color = np.array([255, 0, 0, 128], dtype=np.uint8)  # Red color with alpha
 alpha = 128.0  # Set transparency level (0 to 255) as a float
 
-# Ensure the alpha channel is a 2D array
+# Extract the alpha channel
 alpha_channel = image[:, :, 3]  # Extract the alpha channel
-alpha_channel = alpha_channel[:, :, np.newaxis].astype(np.float64)  # Convert to float64
+
+# Normalize alpha channel to the range [0, 1]
+alpha_normalized = alpha_channel / 255.0
 
 # Apply alpha blending using NumPy
 image_with_colored_people = np.copy(image)
-alpha_channel_normalized = alpha_channel / 255.0  # Normalize alpha channel to the range [0, 1]
 image_with_colored_people[mask, :3] = (
-    (1 - alpha_channel_normalized[mask, None]) * image_with_colored_people[mask, :3] +
-    alpha_channel_normalized[mask, None] * color[:3]
+    (1 - alpha_normalized[mask, None]) * image_with_colored_people[mask, :3] +
+    alpha_normalized[mask, None] * color[:3]
 ).astype(np.uint8)
+
 image_with_colored_people[mask, 3] = (
-    alpha_channel[mask] + (1 - alpha_channel_normalized[mask]) * color[3]
+    alpha_channel[mask] * (1 - alpha / 255) +
+    alpha * alpha_normalized[mask]
 ).astype(np.uint8)
 
 # Display the original image and the image with highlighted people's bodies using OpenCV
