@@ -1,7 +1,6 @@
 import torch
 from torchvision.models.segmentation import deeplabv3_resnet101
 from torchvision.transforms import functional as F
-import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 
@@ -32,25 +31,23 @@ people_class_index = 15
 mask = segmentation == people_class_index
 
 # Change the color and alpha of people's bodies
-color = np.array([255, 0, 0, 128], dtype=np.uint8)  # Red color with alpha
+color = np.array([0, 0, 255, 128], dtype=np.uint8)  # Blue color with alpha
 alpha = 128.0  # Set transparency level (0 to 255) as a float
 
-# Extract the alpha channel
-alpha_channel = image[:, :, 3]  # Extract the alpha channel
+# Apply alpha blending using OpenCV
+image_with_colored_people = np.copy(image)
 
 # Normalize alpha channel to the range [0, 1]
-alpha_normalized = alpha_channel / 255.0
+alpha_normalized = alpha / 255.0
 
 # Apply alpha blending using NumPy
-image_with_colored_people = np.copy(image)
 image_with_colored_people[mask, :3] = (
-    (1 - alpha_normalized[mask, None]) * image_with_colored_people[mask, :3] +
-    alpha_normalized[mask, None] * color[:3]
+    (1 - alpha_normalized) * image_with_colored_people[mask, :3] +
+    alpha_normalized * color[:3]
 ).astype(np.uint8)
 
 image_with_colored_people[mask, 3] = (
-    alpha_channel[mask] * (1 - alpha / 255) +
-    alpha * alpha_normalized[mask]
+    alpha + (1 - alpha_normalized) * image_with_colored_people[mask, 3]
 ).astype(np.uint8)
 
 # Display the original image and the image with highlighted people's bodies using OpenCV
