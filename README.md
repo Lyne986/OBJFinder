@@ -1,5 +1,4 @@
 # Object Finder
-```markdown
 
 ## Overview
 
