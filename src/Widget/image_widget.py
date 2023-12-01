@@ -26,6 +26,7 @@ class ImageWidget(QWidget):
         self.blue = 255
         self.blur_level = 0
 
+        self.img_selected = False
 
         # UI elements
         self.image_label = QLabel()
@@ -139,6 +140,7 @@ class ImageWidget(QWidget):
             self.delete_image_button.setEnabled(True)
 
             # Display the selected image
+            self.img_selected = True
             self.update_mask()
 
     def delete_image(self):
@@ -154,6 +156,8 @@ class ImageWidget(QWidget):
 
         # Check if the alpha slider triggered the update
         if current_alpha != self.alpha or current_red != self.red or current_blue != self.blue or current_green != self.green:
+            if self.img_selected == False:
+                return
 
             # Update the mask based on the current alpha slider value
             self.alpha = current_alpha
