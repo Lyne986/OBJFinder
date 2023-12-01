@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QSlider
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QSlider
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import Qt
 import torch
@@ -16,26 +16,35 @@ class PeopleHighlightApp(QWidget):
         self.model = deeplabv3_resnet101(pretrained=True)
         self.model.eval()
 
+        # Initialize mask
+        self.mask = None
+
         # UI elements
         self.image_label = QLabel()
-        self.segment_button = QPushButton("Highlight People")
         self.alpha_slider = QSlider(Qt.Horizontal)
         self.alpha_slider.setRange(0, 255)
         self.alpha_slider.setValue(128)
 
-        # Connect button click to the highlight function
-        self.segment_button.clicked.connect(self.highlight_people)
+        # Connect slider value change to update mask dynamically
+        self.alpha_slider.valueChanged.connect(self.update_mask)
 
         # Layout
         layout = QVBoxLayout()
         layout.addWidget(self.image_label)
-        layout.addWidget(self.segment_button)
         layout.addWidget(QLabel("Alpha:"))
         layout.addWidget(self.alpha_slider)
         self.setLayout(layout)
 
         # Set a fixed size for the main window
         self.setFixedSize(800, 600)
+
+        # Load the image
+        self.image_path = "./data/sample_images/sample_01.jpeg"
+        self.image = self.load_image(self.image_path)
+
+        # Initial segmentation and mask
+        self.segmentation = self.apply_segmentation(self.image)
+        self.update_mask()
 
     def load_image(self, image_path):
         # Load your image using OpenCV
@@ -56,6 +65,15 @@ class PeopleHighlightApp(QWidget):
         # Create a mask for people's bodies
         mask = segmentation == people_class_index
         return mask
+
+    def update_mask(self):
+        # Update the mask based on the current slider value
+        alpha = self.alpha_slider.value()
+        self.mask = self.create_people_mask(self.segmentation)
+
+        # Color people's bodies with the specified alpha and display the result
+        colored_people_image = self.color_people_bodies(self.image, self.mask, alpha)
+        self.display_image(colored_people_image)
 
     def color_people_bodies(self, image, mask, alpha):
         # Change the color and alpha of people's bodies
@@ -78,30 +96,10 @@ class PeopleHighlightApp(QWidget):
         bytes_per_line = 3 * width
         q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_RGB888)
         pixmap = QPixmap(q_image)
-        
+
         # Set aspect ratio policy to keep the image unscaled
         self.image_label.setPixmap(pixmap)
         self.image_label.setScaledContents(True)
-
-    def highlight_people(self):
-        # Load the image
-        image_path = "./data/sample_images/sample_01.jpeg"
-        image = self.load_image(image_path)
-
-        # Apply segmentation
-        segmentation = self.apply_segmentation(image)
-
-        # Create a mask for people's bodies
-        mask = self.create_people_mask(segmentation)
-
-        # Get the alpha value from the slider
-        alpha = self.alpha_slider.value()
-
-        # Color people's bodies with the specified alpha
-        colored_people_image = self.color_people_bodies(image, mask, alpha)
-
-        # Display the result
-        self.display_image(colored_people_image)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
