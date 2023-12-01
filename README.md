@@ -1,5 +1,3 @@
-Certainly! Below is a sample README.md for your project:
-
 ```markdown
 # Object Finder
 
@@ -43,13 +41,17 @@ Object Finder is a Python project that uses the DeepLabV3+ model to identify peo
 - `data/sample_images/`: Contains sample images for testing.
 - `requirements.txt`: Lists the required Python libraries and their versions.
 
+## Contributions
+
+- Developer: [@your-username](https://github.com/Lyne986)
+- Developer: [@dev-username](https://github.com/BastienBoymond)
+- Developer: [@dev-username](https://github.com/westsea6535)
+- Developer: [@dev-username](https://github.com/Carpetic)
+
 ## Acknowledgments
 
 - DeepLabV3+ model: [torchvision.models.segmentation.deeplabv3_resnet101](https://pytorch.org/vision/stable/models.html#deeplabv3-resnet101)
 - OpenCV: [opencv-python](https://pypi.org/project/opencv-python/)
 
 Feel free to customize the project to fit your specific needs!
-
 ```
-
-Replace "your-username" in the clone URL with your actual GitHub username. This README provides a clear guide on how to set up, run, and understand the project. You can enhance it further based on additional features or specifics of your project.
