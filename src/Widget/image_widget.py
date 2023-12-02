@@ -1,7 +1,7 @@
-
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog, QCheckBox, QFrame
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog, QFrame
+from PyQt5.QtGui import QImage, QPixmap, QColor
+import cv2
 from image_modification import ImageModification
 from segmentation_model import PeopleSegmentationModel
 
@@ -108,12 +108,6 @@ class ImageWidget(QWidget):
         self.blue_slider.valueChanged.connect(self.update_mask)
         self.green_slider.valueChanged.connect(self.update_mask)
 
-
-
-        self.alpha_checkbox = QCheckBox("Show Alpha Slider")
-        self.alpha_checkbox.setChecked(True)
-        self.alpha_checkbox.stateChanged.connect(self.toggle_alpha_slider)
-
         self.blur_slider = QSlider(Qt.Horizontal)
         self.blur_slider.setRange(0, 10)
         self.blur_slider.setValue(self.blur_level)
@@ -135,10 +129,6 @@ class ImageWidget(QWidget):
         # Connect blur slider value change to update blur level dynamically
         self.blur_slider.valueChanged.connect(self.update_blur_level)
 
-        self.blur_checkbox = QCheckBox("Show Blur Slider")
-        self.blur_checkbox.setChecked(True)
-        self.blur_checkbox.stateChanged.connect(self.toggle_blur_slider)
-
         # Button to choose an image
         self.choose_image_button = QPushButton("Choose Image")
         self.choose_image_button.clicked.connect(self.choose_image)
@@ -148,21 +138,20 @@ class ImageWidget(QWidget):
         self.delete_image_button.clicked.connect(self.delete_image)
         self.delete_image_button.setEnabled(False)
 
+        # Button to save the modified image
+        self.save_image_button = QPushButton("Save Modified Image")
+        self.save_image_button.clicked.connect(self.save_modified_image)
+        self.save_image_button.setEnabled(False)
+
         # Layout
         slider_layout = QHBoxLayout()
 
-
-        slider_layout.addWidget(self.alpha_checkbox)
         slider_layout.addWidget(QLabel("Alpha:"))
         slider_layout.addWidget(self.alpha_slider)
 
-
         divider_1 = QFrame()
         divider_1.setFrameShape(QFrame.VLine)
-        # divider_1.setFrameShadow(QFrame.Sunken)
-
-        slider_layout.addWidget(divider_1)        
-        slider_layout.addWidget(self.blur_checkbox)
+        slider_layout.addWidget(divider_1)
         slider_layout.addWidget(QLabel("Blur Level:"))
         slider_layout.addWidget(self.blur_slider)
 
@@ -174,10 +163,10 @@ class ImageWidget(QWidget):
         color_layout.addWidget(QLabel("Blue: "))
         color_layout.addWidget(self.blue_slider)
 
-
         button_layout = QHBoxLayout()
         button_layout.addWidget(self.choose_image_button)
         button_layout.addWidget(self.delete_image_button)
+        button_layout.addWidget(self.save_image_button)  # Add the save button to the layout
 
         main_layout = QVBoxLayout(self)
         main_layout.addWidget(self.image_label)
@@ -209,13 +198,14 @@ class ImageWidget(QWidget):
             # Initial segmentation and mask
             self.segmentation = self.segmentation_model.apply_segmentation(self.image)
 
-            # Enable sliders and delete button
+            # Enable sliders, delete button, and save button
             self.alpha_slider.setEnabled(True)
             self.red_slider.setEnabled(True)
             self.blue_slider.setEnabled(True)
-            self.blue_slider.setEnabled(True)
+            self.green_slider.setEnabled(True)
             self.blur_slider.setEnabled(True)
             self.delete_image_button.setEnabled(True)
+            self.save_image_button.setEnabled(True)  # Enable the save button
 
             # Display the selected image
             self.img_selected = True
@@ -234,7 +224,7 @@ class ImageWidget(QWidget):
 
         # Check if the alpha slider triggered the update
         if current_alpha != self.alpha or current_red != self.red or current_blue != self.blue or current_green != self.green:
-            if self.img_selected == False:
+            if self.img_selected is False:
                 return
 
             # Update the mask based on the current alpha slider value
@@ -270,14 +260,6 @@ class ImageWidget(QWidget):
             )
             self.display_image(colored_blurred_people_image)
 
-    def toggle_alpha_slider(self, state):
-        # Enable/disable alpha slider based on the checkbox state
-        self.alpha_slider.setEnabled(state == Qt.Checked)
-
-    def toggle_blur_slider(self, state):
-        # Enable/disable blur slider based on the checkbox state
-        self.blur_slider.setEnabled(state == Qt.Checked)
-
     def display_image(self, image):
         # Display the image in the QLabel without using NumPy
         height, width = len(image), len(image[0])
@@ -295,3 +277,30 @@ class ImageWidget(QWidget):
         # Set aspect ratio policy to keep the image unscaled
         self.image_label.setPixmap(QPixmap(q_image))
         self.image_label.setScaledContents(True)
+
+    def save_modified_image(self):
+        if hasattr(self, 'colored_image'):
+            # Open a file dialog to choose a location to save the image
+            file_dialog = QFileDialog()
+            file_dialog.setNameFilter("Images (*.png)")
+            file_dialog.setWindowTitle("Save Modified Image")
+            file_dialog.setAcceptMode(QFileDialog.AcceptSave)
+
+            if file_dialog.exec_():
+                # Get the selected file path
+                save_path = file_dialog.selectedFiles()[0]
+
+                # Convert the colored_image list to a format suitable for QImage
+                height, width = len(self.colored_image), len(self.colored_image[0])
+                bytes_per_line = 3 * width
+                q_image = QImage(width, height, QImage.Format_RGB888)
+
+                # Set pixel values to the QImage
+                for y in range(height):
+                    for x in range(width):
+                        pixel = self.colored_image[y][x]
+                        q_color = QColor(pixel[0], pixel[1], pixel[2])
+                        q_image.setPixel(x, y, q_color.rgb())
+
+                # Save the QImage to the specified path
+                q_image.save(save_path)

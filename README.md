@@ -1,8 +1,9 @@
 # Object Finder
+```markdown
 
 ## Overview
 
-Object Finder is a Python project that uses the DeepLabV3+ model to identify people in an image and highlight them with a colored overlay.
+Object Finder is a Python project that uses the DeepLabV3+ model to identify people in an image and highlight them with a colored overlay. The project features a user interface (UI) created with PyQt5 for an interactive experience.
 
 ## Requirements
 
@@ -33,6 +34,15 @@ Object Finder is a Python project that uses the DeepLabV3+ model to identify peo
 - The project uses the DeepLabV3+ model from torchvision to perform semantic segmentation on the input image.
 - Identified people are highlighted with a specified color and transparency level.
 - OpenCV is utilized for image processing.
+- The UI is built with PyQt5, providing a user-friendly interface for image manipulation.
+
+## UI Screenshots
+
+![Main Interface](./data/screenshots/interface.png)
+*Caption: The main interface of the Object Finder application.*
+
+![Image Selection](./data/screenshots/image_selection.png)
+*Caption: Selecting an image using the UI.*
 
 ## File Structure
 
@@ -51,6 +61,8 @@ Object Finder is a Python project that uses the DeepLabV3+ model to identify peo
 
 - DeepLabV3+ model: [torchvision.models.segmentation.deeplabv3_resnet101](https://pytorch.org/vision/stable/models.html#deeplabv3-resnet101)
 - OpenCV: [opencv-python](https://pypi.org/project/opencv-python/)
+
+**Note**: This project adheres to specific guidelines. Numpy is intentionally excluded, and only input/output functions from OpenCV are used.
 
 Feel free to customize the project to fit your specific needs!
 ```
