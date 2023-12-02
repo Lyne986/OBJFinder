@@ -1,5 +1,6 @@
 import cv2
 
+#Made by 바스티엔 보이몬드 / Bastien Boymond #5023184 and by 디오고 파리아 말틴스 / Diogo Faria Martins #5023192
 class ImageModification:
     def __init__(self):
         self.last_modified_image = None

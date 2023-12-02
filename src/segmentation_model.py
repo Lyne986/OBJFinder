@@ -3,6 +3,7 @@ import torch
 from torchvision.models.segmentation import deeplabv3_resnet101
 from torchvision.transforms import functional as F
 
+#Made by 휴고 니니 / Hugo Nini #5023194
 class PeopleSegmentationModel:
     def __init__(self):
         # Load the DeepLabV3+ model
