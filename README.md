@@ -1,5 +1,4 @@
 # Object Finder
-```markdown
 
 ## Overview
 
@@ -65,4 +64,3 @@ Object Finder is a Python project that uses the DeepLabV3+ model to identify peo
 **Note**: This project adheres to specific guidelines. Numpy is intentionally excluded, and only input/output functions from OpenCV are used.
 
 Feel free to customize the project to fit your specific needs!
-```
