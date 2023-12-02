@@ -1,6 +1,6 @@
 
 from PyQt5.QtCore import QObject, pyqtSignal, Qt
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog, QCheckBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QPushButton, QFileDialog, QCheckBox, QFrame
 from PyQt5.QtGui import QImage, QPixmap
 from image_modification import ImageModification
 from segmentation_model import PeopleSegmentationModel
@@ -33,25 +33,81 @@ class ImageWidget(QWidget):
         self.alpha_slider = QSlider(Qt.Horizontal)
         self.alpha_slider.setRange(0, 255)
         self.alpha_slider.setValue(self.alpha)
+        self.alpha_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: #DDDDDD;
+                height: 7px;
+                border-radius: 5px;
+            }
+
+            QSlider::handle:horizontal {
+                background: #000000;
+                width: 10px;
+                margin: -5px 0;
+                border-radius: 1px;
+            }
+        """)
 
         self.red_slider = QSlider(Qt.Horizontal)
         self.red_slider.setRange(0, 255)
         self.red_slider.setValue(self.red)
+        self.red_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: #FFDDDD;
+                height: 7px;
+                border-radius: 5px;
+            }
 
+            QSlider::handle:horizontal {
+                background: #FF0000;
+                width: 10px;
+                margin: -5px 0;
+                border-radius: 1px;
+            }
+        """)
 
         self.green_slider = QSlider(Qt.Horizontal)
         self.green_slider.setRange(0, 255)
         self.green_slider.setValue(self.green)
+        self.green_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: #DDFFDD;
+                height: 7px;
+                border-radius: 5px;
+            }
+
+            QSlider::handle:horizontal {
+                background: #00FF00;
+                width: 10px;
+                margin: -5px 0;
+                border-radius: 1px;
+            }
+        """)
 
         self.blue_slider = QSlider(Qt.Horizontal)
         self.blue_slider.setRange(0, 255)
         self.blue_slider.setValue(self.blue)
+        self.blue_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: #DDDDFF;
+                height: 7px;
+                border-radius: 5px;
+            }
+
+            QSlider::handle:horizontal {
+                background: #0000FF;
+                width: 10px;
+                margin: -5px 0;
+                border-radius: 1px;
+            }
+        """)
 
         # Connect slider value change to update mask and blur level dynamically
         self.alpha_slider.valueChanged.connect(self.update_mask)
         self.red_slider.valueChanged.connect(self.update_mask)
         self.blue_slider.valueChanged.connect(self.update_mask)
         self.green_slider.valueChanged.connect(self.update_mask)
+
 
 
         self.alpha_checkbox = QCheckBox("Show Alpha Slider")
@@ -61,6 +117,20 @@ class ImageWidget(QWidget):
         self.blur_slider = QSlider(Qt.Horizontal)
         self.blur_slider.setRange(0, 10)
         self.blur_slider.setValue(self.blur_level)
+        self.blur_slider.setStyleSheet("""
+            QSlider::groove:horizontal {
+                background: #DDDDDD;
+                height: 7px;
+                border-radius: 5px;
+            }
+
+            QSlider::handle:horizontal {
+                background: #000000;
+                width: 10px;
+                margin: -5px 0;
+                border-radius: 1px;
+            }
+        """)
 
         # Connect blur slider value change to update blur level dynamically
         self.blur_slider.valueChanged.connect(self.update_blur_level)
@@ -80,20 +150,28 @@ class ImageWidget(QWidget):
 
         # Layout
         slider_layout = QHBoxLayout()
+
+
         slider_layout.addWidget(self.alpha_checkbox)
         slider_layout.addWidget(QLabel("Alpha:"))
         slider_layout.addWidget(self.alpha_slider)
-        
+
+
+        divider_1 = QFrame()
+        divider_1.setFrameShape(QFrame.VLine)
+        # divider_1.setFrameShadow(QFrame.Sunken)
+
+        slider_layout.addWidget(divider_1)        
         slider_layout.addWidget(self.blur_checkbox)
         slider_layout.addWidget(QLabel("Blur Level:"))
         slider_layout.addWidget(self.blur_slider)
 
         color_layout = QHBoxLayout()
-        color_layout.addWidget(QLabel("Red"))
+        color_layout.addWidget(QLabel("Red: "))
         color_layout.addWidget(self.red_slider)
-        color_layout.addWidget(QLabel("Green"))
+        color_layout.addWidget(QLabel("Green: "))
         color_layout.addWidget(self.green_slider)
-        color_layout.addWidget(QLabel("Blue"))
+        color_layout.addWidget(QLabel("Blue: "))
         color_layout.addWidget(self.blue_slider)
 
 
