@@ -29,6 +29,7 @@ class ImageWidget(QWidget):
         self.alpha_slider = QSlider(Qt.Horizontal)
         self.alpha_slider.setRange(0, 255)
         self.alpha_slider.setValue(self.alpha)
+        self.alpha_slider.setCursor(Qt.PointingHandCursor)
         self.alpha_slider.setStyleSheet("""
             QSlider::groove:horizontal {
                 background: #DDDDDD;
@@ -42,11 +43,15 @@ class ImageWidget(QWidget):
                 margin: -5px 0;
                 border-radius: 1px;
             }
+            QSlider::handle:horizontal:hover {
+                background-color: #888888;
+            }
         """)
 
         self.red_slider = QSlider(Qt.Horizontal)
         self.red_slider.setRange(0, 255)
         self.red_slider.setValue(self.red)
+        self.red_slider.setCursor(Qt.PointingHandCursor)
         self.red_slider.setStyleSheet("""
             QSlider::groove:horizontal {
                 background: #FFDDDD;
@@ -60,11 +65,15 @@ class ImageWidget(QWidget):
                 margin: -5px 0;
                 border-radius: 1px;
             }
+            QSlider::handle:horizontal:hover {
+                background-color: #FF8888;
+            }
         """)
 
         self.green_slider = QSlider(Qt.Horizontal)
         self.green_slider.setRange(0, 255)
         self.green_slider.setValue(self.green)
+        self.green_slider.setCursor(Qt.PointingHandCursor)
         self.green_slider.setStyleSheet("""
             QSlider::groove:horizontal {
                 background: #DDFFDD;
@@ -78,11 +87,15 @@ class ImageWidget(QWidget):
                 margin: -5px 0;
                 border-radius: 1px;
             }
+            QSlider::handle:horizontal:hover {
+                background-color: #88FF88;
+            }
         """)
 
         self.blue_slider = QSlider(Qt.Horizontal)
         self.blue_slider.setRange(0, 255)
         self.blue_slider.setValue(self.blue)
+        self.blue_slider.setCursor(Qt.PointingHandCursor)
         self.blue_slider.setStyleSheet("""
             QSlider::groove:horizontal {
                 background: #DDDDFF;
@@ -96,6 +109,9 @@ class ImageWidget(QWidget):
                 margin: -5px 0;
                 border-radius: 1px;
             }
+            QSlider::handle:horizontal:hover {
+                background-color: #8888FF;
+            }
         """)
 
         self.alpha_slider.valueChanged.connect(self.update_mask)
@@ -106,18 +122,22 @@ class ImageWidget(QWidget):
         self.blur_slider = QSlider(Qt.Horizontal)
         self.blur_slider.setRange(0, 10)
         self.blur_slider.setValue(self.blur_level)
+        self.blur_slider.setCursor(Qt.PointingHandCursor)
         self.blur_slider.setStyleSheet("""
             QSlider::groove:horizontal {
                 background: #DDDDDD;
                 height: 7px;
                 border-radius: 5px;
             }
-
             QSlider::handle:horizontal {
                 background: #000000;
                 width: 10px;
+                height: 30px;
                 margin: -5px 0;
                 border-radius: 1px;
+            }
+            QSlider::handle:horizontal:hover {
+                background-color: #888888;
             }
         """)
 
@@ -141,6 +161,26 @@ class ImageWidget(QWidget):
 
         divider_1 = QFrame()
         divider_1.setFrameShape(QFrame.VLine)
+        divider_1.setStyleSheet("""
+            QFrame {
+                color: rgb(205, 205, 205);
+            }
+        """)
+        divider_2 = QFrame()
+        divider_2.setFrameShape(QFrame.VLine)
+        divider_2.setStyleSheet("""
+            QFrame {
+                color: rgb(205, 205, 205);
+            }
+        """)
+        divider_3 = QFrame()
+        divider_3.setFrameShape(QFrame.VLine)
+        divider_3.setStyleSheet("""
+            QFrame {
+                color: rgb(205, 205, 205);
+            }
+        """)
+
         slider_layout.addWidget(divider_1)
         slider_layout.addWidget(QLabel("Blur Level:"))
         slider_layout.addWidget(self.blur_slider)
@@ -148,8 +188,10 @@ class ImageWidget(QWidget):
         color_layout = QHBoxLayout()
         color_layout.addWidget(QLabel("Red: "))
         color_layout.addWidget(self.red_slider)
+        color_layout.addWidget(divider_2)
         color_layout.addWidget(QLabel("Green: "))
         color_layout.addWidget(self.green_slider)
+        color_layout.addWidget(divider_3)
         color_layout.addWidget(QLabel("Blue: "))
         color_layout.addWidget(self.blue_slider)
 

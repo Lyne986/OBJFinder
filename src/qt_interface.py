@@ -4,12 +4,21 @@ from PyQt5.QtGui import QImage, QPixmap
 from image_modification import ImageModification
 from segmentation_model import PeopleSegmentationModel
 from Widget.image_widget import ImageWidget
+from PyQt5.QtGui import QFont, QFontDatabase
 
 class QTInterface(QWidget):
     def __init__(self):
         super(QTInterface, self).__init__()
 
         self.segmentation_model = PeopleSegmentationModel()
+
+        font_id = QFontDatabase.addApplicationFont("./src/Fonts/Roboto-Regular.ttf")
+        print(font_id)
+        if font_id != -1:
+            print("font uploaded")
+            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
+            font = QFont(font_family, 12)
+            self.setFont(font)
 
         main_layout = QVBoxLayout(self)
         self.scroll_area = QWidget()
