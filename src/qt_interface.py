@@ -5,6 +5,7 @@ from image_modification import ImageModification
 from segmentation_model import PeopleSegmentationModel
 from Widget.image_widget import ImageWidget
 
+#Made by 디오고 파리아 말틴스 / Diogo Faria Martins #5023192
 class QTInterface(QWidget):
     def __init__(self):
         super(QTInterface, self).__init__()

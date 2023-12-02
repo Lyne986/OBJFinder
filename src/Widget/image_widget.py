@@ -5,6 +5,7 @@ import cv2
 from image_modification import ImageModification
 from segmentation_model import PeopleSegmentationModel
 
+#Made by 김서해 / Kim Seohae #20210771
 class ImageWidget(QWidget):
     deleted = pyqtSignal()
 
